@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui";
 
 export function WhoAreYou({ players, onChoose }: { players: string[]; onChoose: (p: string) => void }) {
   const [picked, setPicked] = useState<string | null>(null);
+  const confirmBox = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (picked) confirmBox.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [picked]);
 
   return (
-    <div className="mx-auto max-w-xl py-6">
+    <div className="mx-auto max-w-3xl py-6">
       <h2 className="text-center text-4xl font-extrabold uppercase">Who are you?</h2>
       <p className="mt-1 text-center text-muted">Pick your name. Your predictions are saved under it.</p>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {players.map((p) => (
           <button
             key={p}
@@ -27,7 +31,7 @@ export function WhoAreYou({ players, onChoose }: { players: string[]; onChoose: 
       </div>
 
       {picked && (
-        <div className="card mt-6 text-center" role="dialog" aria-label="Confirm your name">
+        <div ref={confirmBox} className="card mt-6 text-center" role="dialog" aria-label="Confirm your name">
           <p className="text-lg">
             Are you <b className="text-orange">{picked}</b>?
           </p>

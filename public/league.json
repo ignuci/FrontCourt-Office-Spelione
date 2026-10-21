@@ -1,7 +1,20 @@
 {
   "season": "2026–27",
   "sheetUrl": "",
-  "players": ["Player 1", "Player 2", "Player 3"],
+  "players": [
+    "Arnas",
+    "Danielius",
+    "Domantas",
+    "Henrikas",
+    "Ignas",
+    "Jurgis",
+    "Justas",
+    "Laurynas",
+    "Liutauras",
+    "Marius",
+    "Simas",
+    "Titas"
+  ],
   "stages": [
     {
       "id": "ruduo",
@@ -9,22 +22,126 @@
       "lock": "2026-10-31T23:59:00+03:00",
       "note": "DRAFT questions — replace with the real ones before sharing the site.",
       "questions": [
-        { "id": "ruduo-1", "type": "team", "points": 5, "text": "Which team will have the best record in the league on November 30?", "answer": null },
-        { "id": "ruduo-2", "type": "team", "points": 5, "text": "Which team will have the worst record in the league on November 30?", "answer": null },
-        { "id": "ruduo-3", "type": "team", "conf": "E", "points": 3, "text": "Who will be the #1 seed in the East on November 30?", "answer": null },
-        { "id": "ruduo-4", "type": "team", "conf": "W", "points": 3, "text": "Who will be the #1 seed in the West on November 30?", "answer": null },
-        { "id": "ruduo-5", "type": "team", "points": 4, "text": "Which team will win the NBA Cup?", "answer": null },
-        { "id": "ruduo-6", "type": "text", "points": 4, "text": "Who will lead the league in points per game on November 30?", "answer": null },
-        { "id": "ruduo-7", "type": "text", "points": 4, "text": "Who will lead the league in rebounds per game on November 30?", "answer": null },
-        { "id": "ruduo-8", "type": "text", "points": 4, "text": "Who will be the first head coach fired this season?", "answer": null },
-        { "id": "ruduo-9", "type": "number", "points": 3, "tolerance": 1, "text": "How many wins will the league's best team have on November 30? (±1 counts)", "answer": null },
-        { "id": "ruduo-10", "type": "choice", "points": 2, "options": ["0", "1", "2", "3 or more"], "text": "How many teams will still be unbeaten on November 1?", "answer": null },
-        { "id": "ruduo-11", "type": "choice", "points": 2, "options": ["Yes", "No"], "text": "Will any player score 60+ points in a game before December 1?", "answer": null },
-        { "id": "ruduo-12", "type": "choice", "points": 2, "options": ["Yes", "No"], "text": "Will there be a trade involving an All-Star before December 1?", "answer": null }
+        {
+          "id": "ruduo-1",
+          "type": "team",
+          "points": 5,
+          "text": "Which team will have the best record in the league on November 30?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-2",
+          "type": "team",
+          "points": 5,
+          "text": "Which team will have the worst record in the league on November 30?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-3",
+          "type": "team",
+          "conf": "E",
+          "points": 3,
+          "text": "Who will be the #1 seed in the East on November 30?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-4",
+          "type": "team",
+          "conf": "W",
+          "points": 3,
+          "text": "Who will be the #1 seed in the West on November 30?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-5",
+          "type": "team",
+          "points": 4,
+          "text": "Which team will win the NBA Cup?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-6",
+          "type": "text",
+          "points": 4,
+          "text": "Who will lead the league in points per game on November 30?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-7",
+          "type": "text",
+          "points": 4,
+          "text": "Who will lead the league in rebounds per game on November 30?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-8",
+          "type": "text",
+          "points": 4,
+          "text": "Who will be the first head coach fired this season?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-9",
+          "type": "number",
+          "points": 3,
+          "tolerance": 1,
+          "text": "How many wins will the league's best team have on November 30? (±1 counts)",
+          "answer": null
+        },
+        {
+          "id": "ruduo-10",
+          "type": "choice",
+          "points": 2,
+          "options": [
+            "0",
+            "1",
+            "2",
+            "3 or more"
+          ],
+          "text": "How many teams will still be unbeaten on November 1?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-11",
+          "type": "choice",
+          "points": 2,
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "text": "Will any player score 60+ points in a game before December 1?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-12",
+          "type": "choice",
+          "points": 2,
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "text": "Will there be a trade involving an All-Star before December 1?",
+          "answer": null
+        }
       ]
     },
-    { "id": "kaledos", "name": "Kalėdos", "lock": "2026-12-24T23:59:00+03:00", "questions": [] },
-    { "id": "all-star", "name": "All-Star", "lock": "2027-02-12T23:59:00+03:00", "questions": [] },
-    { "id": "pavasaris", "name": "Pavasaris", "lock": "2027-04-10T23:59:00+03:00", "questions": [] }
+    {
+      "id": "kaledos",
+      "name": "Kalėdos",
+      "lock": "2026-12-24T23:59:00+03:00",
+      "questions": []
+    },
+    {
+      "id": "all-star",
+      "name": "All-Star",
+      "lock": "2027-02-12T23:59:00+03:00",
+      "questions": []
+    },
+    {
+      "id": "pavasaris",
+      "name": "Pavasaris",
+      "lock": "2027-04-10T23:59:00+03:00",
+      "questions": []
+    }
   ]
 }

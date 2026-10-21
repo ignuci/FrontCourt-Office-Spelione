@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   answeredCount, formatAnswer, isCorrect, maxPoints, scoreAnswers, stageStatus,
   type Answers, type League, type Question, type Stage, type Submission,
@@ -36,7 +36,7 @@ export function StageView(p: Props) {
         <div className="min-w-0 flex-1">
           <h2 className="text-4xl font-extrabold uppercase">{stage.name}</h2>
           <p className="text-sm text-muted">
-            {status === "locked" ? `Locked ${fmtDate(stage.lock)}` : `Locks ${fmtDate(stage.lock)}`}
+            {status === "locked" ? `Locked ${fmtDate(stage.lock)}` : status === "open" ? `Locks ${fmtDate(stage.lock)}` : "Not open yet"}
             {stage.questions.length > 0 && ` · ${stage.questions.length} questions · up to ${maxPoints(stage)} pts`}
           </p>
         </div>
@@ -45,10 +45,10 @@ export function StageView(p: Props) {
         {status === "soon" && <Tag tone="lock">Coming soon</Tag>}
       </div>
 
-      {stage.note && <p className="mb-4 rounded-xl bg-orange-soft px-3.5 py-2.5 text-[13px] text-orange-deep">{stage.note}</p>}
+      {stage.note && status !== "soon" && <p className="mb-4 rounded-xl bg-orange-soft px-3.5 py-2.5 text-[13px] text-orange-deep">{stage.note}</p>}
 
       {status === "soon" ? (
-        <Empty>The questions for {stage.name} aren&apos;t out yet. Check back soon.</Empty>
+        <ComingSoon stage={stage} />
       ) : p.submission ? (
         <MyAnswers stage={stage} submission={p.submission} />
       ) : status === "open" ? (
@@ -85,6 +85,45 @@ export function StageView(p: Props) {
 
       {status === "locked" && <EveryonesAnswers league={p.league} stage={stage} submissions={p.submissions} me={p.player} />}
     </section>
+  );
+}
+
+/* ---------- not open yet ---------- */
+
+function ComingSoon({ stage }: { stage: Stage }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const target = stage.opens ? Date.parse(stage.opens) : NaN;
+  const left = Math.max(0, target - now);
+  const parts: [number, string][] = [
+    [Math.floor(left / 86_400_000), "days"],
+    [Math.floor(left / 3_600_000) % 24, "hours"],
+    [Math.floor(left / 60_000) % 60, "min"],
+    [Math.floor(left / 1000) % 60, "sec"],
+  ];
+  return (
+    <div className="card text-center">
+      {stage.note && <p className="mx-auto mb-4 max-w-xl text-lg">{stage.note}</p>}
+      {Number.isNaN(target) ? (
+        <p className="text-muted">The date for {stage.name} is coming soon.</p>
+      ) : (
+        <>
+          <p className="text-sm font-semibold uppercase tracking-wider text-muted">{stage.name} opens in</p>
+          <div className="mt-3 flex justify-center gap-2 sm:gap-3" role="timer" aria-live="off">
+            {parts.map(([n, label]) => (
+              <div key={label} className="w-18 rounded-xl bg-purple py-3 text-white sm:w-22">
+                <div className="font-display text-4xl font-extrabold leading-none tabular-nums sm:text-5xl">{String(n).padStart(2, "0")}</div>
+                <div className="mt-1 text-[11px] uppercase tracking-wider opacity-75">{label}</div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[13px] text-muted">{new Date(target).toLocaleString(undefined, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</p>
+        </>
+      )}
+    </div>
   );
 }
 
