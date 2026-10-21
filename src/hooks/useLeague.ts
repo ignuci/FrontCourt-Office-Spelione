@@ -69,14 +69,14 @@ export function useLeague() {
       const subs = await fetchSubmissions(league.sheetUrl, player);
       setRemote(subs);
       setSync({ kind: "ok", at: new Date() });
-      // Keep a local copy of our own confirmed answers, e.g. after switching phones.
+      // The sheet is the master copy: mirror exactly what it has for us. If a row was
+      // deleted in the sheet (e.g. a test run), that stage opens up again on this device.
+      // Answers still waiting to be sent live in the outbox, so nothing is lost here.
       if (player) {
-        setMine((cur) => {
-          const next = { ...cur };
-          for (const s of subs) if (s.player === player && s.answers) next[s.stage] = s;
-          write(kMine(player), next);
-          return next;
-        });
+        const next: Record<string, Submission> = {};
+        for (const s of subs) if (s.player === player && s.answers) next[s.stage] = s;
+        write(kMine(player), next);
+        setMine(next);
       }
     } catch (e) {
       setSync({ kind: "error", message: e instanceof Error ? e.message : "Couldn't reach the answer sheet." });
