@@ -10,7 +10,7 @@ const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const metadata: Metadata = {
   title: "FrontCourt Office Spėlionė",
-  description: "Fantasy NBA predictions for the whole season.",
+  description: "NBA sezono spėjimai draugams.",
   icons: { icon: `${base}/icon.svg` },
 };
 
@@ -18,7 +18,7 @@ export const viewport: Viewport = { themeColor: "#3F3454" };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${barlow.variable}`}>
+    <html lang="lt" className={`${inter.variable} ${barlow.variable}`}>
       <body>{children}</body>
     </html>
   );

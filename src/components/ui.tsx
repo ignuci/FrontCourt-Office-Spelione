@@ -44,7 +44,7 @@ export function Tag({ tone, children }: { tone: Tone; children: ReactNode }) {
 export function Points({ value }: { value: number }) {
   return (
     <span className="ml-1.5 inline-block rounded-full bg-orange-soft px-1.5 py-0.5 align-middle font-sans text-[11px] font-bold tracking-normal text-orange-deep">
-      {value} pts
+      {value} tšk.
     </span>
   );
 }

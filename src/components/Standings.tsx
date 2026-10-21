@@ -9,22 +9,22 @@ export function Standings({ league, submissions, me, now }: { league: League; su
 
   return (
     <section>
-      <SectionHead title="Leaderboard">
-        Points count once the correct answers are in. Each question shows what it&apos;s worth.
+      <SectionHead title="Turnyrinė lentelė">
+        Taškai skaičiuojami, kai paaiškėja teisingi atsakymai.
       </SectionHead>
       <div className="card overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
               <th className={`${th} text-left`}>#</th>
-              <th className={`${th} text-left`}>Player</th>
+              <th className={`${th} text-left`}>Žaidėjas</th>
               {league.stages.map((s) => (
                 <th key={s.id} className={`${th} text-right`}>
                   {s.name}
-                  {s.questions.length > 0 && <span className="block font-normal normal-case tracking-normal">of {maxPoints(s)}</span>}
+                  {s.questions.length > 0 && <span className="block font-normal normal-case tracking-normal">iš {maxPoints(s)}</span>}
                 </th>
               ))}
-              <th className={`${th} text-right`}>Total</th>
+              <th className={`${th} text-right`}>Iš viso</th>
             </tr>
           </thead>
           <tbody>
@@ -40,7 +40,7 @@ export function Standings({ league, submissions, me, now }: { league: League; su
                       {v == null ? (
                         <span className="text-muted">{status === "open" ? "…" : "—"}</span>
                       ) : status === "open" ? (
-                        <span className="font-semibold text-good" title="Submitted">✓</span>
+                        <span className="font-semibold text-good" title="Pateikė">✓</span>
                       ) : (
                         v
                       )}
@@ -53,8 +53,8 @@ export function Standings({ league, submissions, me, now }: { league: League; su
           </tbody>
         </table>
         <p className="mt-3 text-[13px] text-muted">
-          {anyScored ? "" : "No correct answers entered yet, so everyone is on 0. "}
-          ✓ = submitted, scored after the lock · “…” = not submitted yet · “—” = didn&apos;t take part.
+          {anyScored ? "" : "Teisingų atsakymų dar nėra, todėl visi turi 0. "}
+          ✓ – pateikė, taškai paaiškės vėliau · „…“ – dar nepateikė · „—“ – nedalyvavo.
         </p>
       </div>
     </section>

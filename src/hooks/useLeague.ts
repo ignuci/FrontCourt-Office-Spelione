@@ -79,7 +79,7 @@ export function useLeague() {
         setMine(next);
       }
     } catch (e) {
-      setSync({ kind: "error", message: e instanceof Error ? e.message : "Couldn't reach the answer sheet." });
+      setSync({ kind: "error", message: e instanceof Error ? e.message : "Nepavyko prisijungti prie spėjimų saugyklos." });
     }
   }, [canSave, player]);
 
@@ -105,8 +105,8 @@ export function useLeague() {
         if (item.player === player) setMine(mineFor);
       } catch (e) {
         // A clear "no" from the sheet (locked, unknown name) won't change on retry — drop it but keep the draft.
-        if (e instanceof SaveError && !/replied \d+/.test(e.message)) left = left.filter((x) => x !== item);
-        lastError = e instanceof Error ? e.message : "Couldn't reach the answer sheet.";
+        if (e instanceof SaveError && !e.retry) left = left.filter((x) => x !== item);
+        lastError = e instanceof Error ? e.message : "Nepavyko prisijungti prie spėjimų saugyklos.";
       }
     }
     write(K_PENDING, left);
@@ -157,8 +157,8 @@ export function useLeague() {
   /** Queue the stage for saving (kept on this phone until the sheet confirms), then send it. */
   const submit = useCallback(
     async (stage: string): Promise<{ ok: true } | { ok: false; message: string }> => {
-      if (!player) return { ok: false, message: "Choose your name first." };
-      if (!canSave) return { ok: false, message: "Saving isn't set up yet." };
+      if (!player) return { ok: false, message: "Pirma pasirink savo vardą." };
+      if (!canSave) return { ok: false, message: "Išsaugojimas dar neįjungtas." };
       const item: Pending = { player, stage, answers: drafts[stage] ?? {}, queuedAt: new Date().toISOString() };
       const queue = [...read<Pending[]>(K_PENDING, []).filter((x) => !(x.player === player && x.stage === stage)), item];
       write(K_PENDING, queue);
@@ -176,14 +176,14 @@ export function useLeague() {
         void refresh();
         return { ok: true };
       } catch (e) {
-        const message = e instanceof Error ? e.message : "Couldn't reach the answer sheet.";
-        const definitive = e instanceof SaveError && !/replied \d+/.test(message);
+        const message = e instanceof Error ? e.message : "Nepavyko prisijungti prie spėjimų saugyklos.";
+        const definitive = e instanceof SaveError && !e.retry;
         if (definitive) {
           const left = read<Pending[]>(K_PENDING, []).filter((x) => !(x.player === player && x.stage === stage));
           write(K_PENDING, left);
           setPending(left);
         }
-        return { ok: false, message: definitive ? message : "No connection to the answer sheet. Your answers are kept on this phone and will be sent automatically." };
+        return { ok: false, message: definitive ? message : "Nėra ryšio. Atsakymai išsaugoti šiame įrenginyje ir bus išsiųsti automatiškai." };
       }
     },
     [player, canSave, drafts, refresh],

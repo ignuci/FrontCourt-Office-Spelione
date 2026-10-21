@@ -3,7 +3,7 @@
  * from public/league.json, which is edited by hand (names, questions, lock
  * dates, correct answers). Submissions come from the Google Sheet.
  */
-import { normalize } from "./scoring.ts";
+import { namesMatch, normalize } from "./text.ts";
 import { TEAM_BY_AB } from "./teams.ts";
 import type { Conference } from "./types.ts";
 
@@ -131,7 +131,8 @@ export function isCorrect(q: Question, given: string | undefined, everyone: (str
       return dist(n) <= (q.tolerance ?? 0);
     }
     case "text":
-      return answers.some((a) => normalize(a) === normalize(given));
+      // Typed names: forgiving about accents, punctuation, Jr. and small typos.
+      return answers.some((a) => namesMatch(a, given));
     default:
       return answers.includes(given);
   }

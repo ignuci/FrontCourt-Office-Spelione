@@ -12,8 +12,8 @@ export function WhoAreYou({ players, onChoose }: { players: string[]; onChoose: 
 
   return (
     <div className="mx-auto max-w-3xl py-6">
-      <h2 className="text-center text-4xl font-extrabold uppercase">Who are you?</h2>
-      <p className="mt-1 text-center text-muted">Pick your name. Your predictions are saved under it.</p>
+      <h2 className="text-center text-4xl font-extrabold uppercase">Kas tu?</h2>
+      <p className="mt-1 text-center text-muted">Pasirink savo vardą – tavo spėjimai bus išsaugoti juo.</p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {players.map((p) => (
@@ -31,16 +31,16 @@ export function WhoAreYou({ players, onChoose }: { players: string[]; onChoose: 
       </div>
 
       {picked && (
-        <div ref={confirmBox} className="card mt-6 text-center" role="dialog" aria-label="Confirm your name">
+        <div ref={confirmBox} className="card mt-6 text-center" role="dialog" aria-label="Patvirtink vardą">
           <p className="text-lg">
-            Are you <b className="text-orange">{picked}</b>?
+            Ar tu – <b className="text-orange">{picked}</b>?
           </p>
-          <p className="mt-1 text-[13px] text-muted">This phone or computer will remember you. Only pick your own name.</p>
+          <p className="mt-1 text-[13px] text-muted">Šis telefonas ar kompiuteris tave įsimins. Rinkis tik savo vardą.</p>
           <div className="mt-4 flex justify-center gap-2.5">
             <Button variant="secondary" onClick={() => setPicked(null)}>
-              No, go back
+              Ne, grįžti
             </Button>
-            <Button onClick={() => onChoose(picked)}>Yes, that&apos;s me</Button>
+            <Button onClick={() => onChoose(picked)}>Taip, tai aš</Button>
           </div>
         </div>
       )}

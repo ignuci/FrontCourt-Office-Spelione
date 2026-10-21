@@ -25,7 +25,7 @@
           "id": "ruduo-q01",
           "type": "team",
           "points": 2,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kuri komanda turės geriausią pergalių procentą visoje NBA iki lapkričio 30 d. 11:00 (LT laiko zona) (toliau - žiema)?",
           "answer": null
         },
@@ -34,7 +34,7 @@
           "type": "team",
           "conf": "E",
           "points": 2,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kuri komanda žiemą rikiuosis pirmoje vietoje Rytų konferencijoje?",
           "answer": null
         },
@@ -43,7 +43,7 @@
           "type": "team",
           "conf": "W",
           "points": 2,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kuri komanda žiemą rikiuosis paskutinėje vietoje Vakarų konferencijoje?",
           "answer": null
         },
@@ -51,7 +51,7 @@
           "id": "ruduo-q04",
           "type": "text",
           "points": 3,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kuris žaidėjas iki žiemos bus įmetęs daugiausiai taškų (iš viso)? (Pilnas vardas, pavardė)",
           "answer": null
         },
@@ -63,7 +63,7 @@
             "Ne"
           ],
           "points": 1,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Ar kažkas iki žiemos bus įmetęs bent 51 tašką per vienerias rungtynes?",
           "answer": null
         },
@@ -133,7 +133,7 @@
             "Malique Lewis"
           ],
           "points": 3,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kuris NBA naujokas iki žiemos turės didžiausią pelnomų taškų vidurkį? (Pilnas vardas, pavardė)",
           "answer": null
         },
@@ -142,7 +142,7 @@
           "type": "number",
           "closest": true,
           "points": 3,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kiek pergalių turės geriausia NBA komanda iki žiemos? (Taškus gauna arčiausiai atspėjęs)",
           "answer": null
         },
@@ -151,7 +151,7 @@
           "type": "number",
           "closest": true,
           "points": 3,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kiek trigubų dublių iš viso bus užfiksuota NBA iki žiemos? (Taškus gauna arčiausiai atspėjęs)",
           "answer": null
         },
@@ -163,7 +163,7 @@
             "Ne"
           ],
           "points": 1,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Ar Steph Curry bent vienose rungtynėse iki žiemos pataikys 8 tritaškius?",
           "answer": null
         },
@@ -175,7 +175,7 @@
             "Ne"
           ],
           "points": 1,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Ar Luka Dončić gaus bent 5 technines pražangas iki žiemos?",
           "answer": null
         },
@@ -187,7 +187,7 @@
             "Warriors"
           ],
           "points": 1,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kas prames daugiau baudų iki žiemos – Giannis Antetokounmpo ar visa „Warriors“ komanda kartu?",
           "answer": null
         },
@@ -200,7 +200,7 @@
             "Trae Young"
           ],
           "points": 1,
-          "reveal": "November 30 11:00",
+          "reveal": "Lapkričio 30 d. 11:00",
           "text": "Kuris žaidėjas iki žiemos turės daugiau rungtynių su bent 5 klaidomis – Luka Dončić, Nikola Jokić ar Trae Young?",
           "answer": null
         },

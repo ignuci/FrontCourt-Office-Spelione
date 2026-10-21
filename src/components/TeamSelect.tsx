@@ -4,7 +4,7 @@ import type { Conference } from "@/lib/types";
 
 export function TeamSelect({
   conf,
-  placeholder = "— pick —",
+  placeholder = "— pasirink —",
   ...props
 }: SelectHTMLAttributes<HTMLSelectElement> & { conf?: Conference; placeholder?: string }) {
   return (

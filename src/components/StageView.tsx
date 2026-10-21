@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   answeredCount, formatAnswer, isCorrect, maxPoints, scoreAnswers, stageAnswers, stageStatus,
   type Answers, type League, type Question, type Stage, type Submission,
 } from "@/lib/league";
+import { fmtDateTime, plural } from "@/lib/lt";
+import { simplifyName, suggest } from "@/lib/text";
 import { TeamSelect } from "./TeamSelect";
 import { Button, Empty, Points, Tag } from "./ui";
 
@@ -22,8 +24,8 @@ interface Props {
   onSubmit: () => Promise<{ ok: true } | { ok: false; message: string }>;
 }
 
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const QUESTIONS: [string, string, string] = ["klausimas", "klausimai", "klausimų"];
+const firstAnswer = (q: Question) => (Array.isArray(q.answer) ? q.answer[0] : (q.answer ?? undefined));
 
 export function StageView(p: Props) {
   const { stage, now } = p;
@@ -36,13 +38,13 @@ export function StageView(p: Props) {
         <div className="min-w-0 flex-1">
           <h2 className="text-4xl font-extrabold uppercase">{stage.name}</h2>
           <p className="text-sm text-muted">
-            {status === "locked" ? `Locked ${fmtDate(stage.lock)}` : status === "open" ? `Locks ${fmtDate(stage.lock)}` : "Not open yet"}
-            {stage.questions.length > 0 && ` · ${stage.questions.length} questions · up to ${maxPoints(stage)} pts`}
+            {status === "locked" ? `Užrakinta ${fmtDateTime(stage.lock)}` : status === "open" ? `Užsirakina ${fmtDateTime(stage.lock)}` : "Dar neatidaryta"}
+            {stage.questions.length > 0 && ` · ${plural(stage.questions.length, QUESTIONS)} · iki ${maxPoints(stage)} tšk.`}
           </p>
         </div>
-        {status === "open" && <Tag tone="open">Open</Tag>}
-        {status === "locked" && <Tag tone="lock">Locked</Tag>}
-        {status === "soon" && <Tag tone="lock">Coming soon</Tag>}
+        {status === "open" && <Tag tone="open">Atidaryta</Tag>}
+        {status === "locked" && <Tag tone="lock">Užrakinta</Tag>}
+        {status === "soon" && <Tag tone="lock">Netrukus</Tag>}
       </div>
 
       {stage.note && status !== "soon" && <p className="mb-4 rounded-xl bg-orange-soft px-3.5 py-2.5 text-[13px] text-orange-deep">{stage.note}</p>}
@@ -58,13 +60,13 @@ export function StageView(p: Props) {
           <AnswerForm {...p} />
         )
       ) : (
-        <Empty>You didn&apos;t submit predictions for {stage.name}.</Empty>
+        <Empty>Šiam etapui spėjimų nepateikei.</Empty>
       )}
 
       {status !== "soon" && (
         <div className="card mt-4">
           <h3 className="text-xl font-extrabold uppercase">
-            Submitted {submitted.length} / {p.league.players.length}
+            Pateikė {submitted.length} / {p.league.players.length}
           </h3>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {p.league.players.map((name) => (
@@ -79,7 +81,7 @@ export function StageView(p: Props) {
               </span>
             ))}
           </div>
-          {status === "open" && <p className="mt-2 text-[13px] text-muted">Everyone&apos;s answers are revealed when {stage.name} locks.</p>}
+          {status === "open" && <p className="mt-2 text-[13px] text-muted">Visų atsakymai bus matomi, kai etapas užsirakins.</p>}
         </div>
       )}
 
@@ -111,19 +113,19 @@ function ComingSoon({ stage }: { stage: Stage }) {
   const target = stage.opens ? Date.parse(stage.opens) : NaN;
   const left = Math.max(0, target - now);
   const parts: [number, string][] = [
-    [Math.floor(left / 86_400_000), "days"],
-    [Math.floor(left / 3_600_000) % 24, "hours"],
-    [Math.floor(left / 60_000) % 60, "min"],
-    [Math.floor(left / 1000) % 60, "sec"],
+    [Math.floor(left / 86_400_000), "d."],
+    [Math.floor(left / 3_600_000) % 24, "val."],
+    [Math.floor(left / 60_000) % 60, "min."],
+    [Math.floor(left / 1000) % 60, "sek."],
   ];
   return (
     <div className="card text-center">
       {stage.note && <p className="mx-auto mb-4 max-w-xl text-lg">{stage.note}</p>}
       {Number.isNaN(target) ? (
-        <p className="text-muted">The date for {stage.name} is coming soon.</p>
+        <p className="text-muted">Data bus paskelbta netrukus.</p>
       ) : (
         <>
-          <p className="text-sm font-semibold uppercase tracking-wider text-muted">{stage.name} opens in</p>
+          <p className="text-sm font-semibold uppercase tracking-wider text-muted">Iki atidarymo liko</p>
           <div className="mt-3 flex justify-center gap-2 sm:gap-3" role="timer" aria-live="off">
             {parts.map(([n, label]) => (
               <div key={label} className="w-18 rounded-xl bg-purple py-3 text-white sm:w-22">
@@ -132,7 +134,7 @@ function ComingSoon({ stage }: { stage: Stage }) {
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[13px] text-muted">{new Date(target).toLocaleString(undefined, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</p>
+          <p className="mt-3 text-[13px] text-muted">{fmtDateTime(stage.opens!)}</p>
         </>
       )}
     </div>
@@ -159,8 +161,8 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
   if (reviewing) {
     return (
       <div className="card">
-        <h3 className="text-2xl font-extrabold uppercase">Check your answers</h3>
-        <p className="mb-3 text-sm text-muted">Once you submit, your answers are final and can&apos;t be changed.</p>
+        <h3 className="text-2xl font-extrabold uppercase">Patikrink atsakymus</h3>
+        <p className="mb-3 text-sm text-muted">Pateikus atsakymų pakeisti nebegalėsi.</p>
         <ol className="divide-y divide-line">
           {stage.questions.map((q, i) => (
             <li key={q.id} className="flex gap-3 py-2.5 text-sm">
@@ -173,10 +175,10 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
         {error && <p className="mt-3 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">{error}</p>}
         <div className="mt-4 flex flex-wrap justify-end gap-2.5">
           <Button variant="secondary" onClick={() => setReviewing(false)} disabled={saving}>
-            Change answers
+            Keisti atsakymus
           </Button>
           <Button onClick={send} disabled={saving}>
-            {saving ? "Saving…" : "Submit — final"}
+            {saving ? "Saugoma…" : "Pateikti galutinai"}
           </Button>
         </div>
       </div>
@@ -200,18 +202,18 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
         ))}
       </ol>
 
-      <div className="sticky bottom-3 mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-card p-3.5 shadow-lg">
+      <div className="sticky bottom-3 z-10 mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-card p-3.5 shadow-lg">
         <div className="min-w-0 flex-1 text-sm">
+          Atsakyta{" "}
           <b>
             {done} / {total}
-          </b>{" "}
-          answered
+          </b>
           <span className="block text-[13px] text-muted">
-            {canSave ? "Your answers are saved on this device as you type." : "Saving isn't switched on yet — you can fill in answers, but not submit."}
+            {canSave ? "Atsakymai išsaugomi šiame įrenginyje, kol pildai." : "Išsaugojimas dar neįjungtas – pildyti gali, bet pateikti dar ne."}
           </span>
         </div>
         <Button onClick={() => setReviewing(true)} disabled={done < total || !canSave}>
-          Review &amp; submit
+          Peržiūrėti ir pateikti
         </Button>
       </div>
     </div>
@@ -220,19 +222,10 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
 
 function AnswerInput({ q, value, onChange }: { q: Question; value: string; onChange: (v: string) => void }) {
   if (q.type === "team") {
-    return <TeamSelect aria-label={q.text} conf={q.conf} placeholder="— choose a team —" value={value} onChange={(e) => onChange(e.target.value)} />;
+    return <TeamSelect aria-label={q.text} conf={q.conf} placeholder="— pasirink komandą —" value={value} onChange={(e) => onChange(e.target.value)} />;
   }
   if (q.type === "choice" && (q.options?.length ?? 0) > 8) {
-    return (
-      <select aria-label={q.text} value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="">— pasirink —</option>
-        {q.options?.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    );
+    return <TypeAhead q={q} value={value} onChange={onChange} />;
   }
   if (q.type === "choice") {
     return (
@@ -258,7 +251,7 @@ function AnswerInput({ q, value, onChange }: { q: Question; value: string; onCha
       aria-label={q.text}
       type={q.type === "number" ? "number" : "text"}
       inputMode={q.type === "number" ? "numeric" : undefined}
-      placeholder={q.type === "number" ? "Your number" : "Your answer"}
+      placeholder={q.type === "number" ? "Tavo skaičius" : "Tavo atsakymas"}
       maxLength={200}
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -266,13 +259,98 @@ function AnswerInput({ q, value, onChange }: { q: Question; value: string; onCha
   );
 }
 
+/** Type a few letters, pick from the suggestions. Only a name from the list counts as an answer. */
+function TypeAhead({ q, value, onChange }: { q: Question; value: string; onChange: (v: string) => void }) {
+  const options = q.options ?? [];
+  const [text, setText] = useState(value);
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
+  const listId = `${q.id}-list`;
+  const box = useRef<HTMLDivElement>(null);
+  const matches = suggest(options, text);
+
+  const choose = (o: string) => {
+    setText(o);
+    onChange(o);
+    setOpen(false);
+  };
+  const type = (v: string) => {
+    setText(v);
+    setOpen(true);
+    setHi(0);
+    // Typed the full name exactly? Count it without needing a click.
+    onChange(options.find((o) => simplifyName(o) === simplifyName(v)) ?? "");
+  };
+
+  return (
+    <div
+      ref={box}
+      className="relative"
+      onBlur={(e) => {
+        if (!box.current?.contains(e.relatedTarget as Node)) setOpen(false);
+      }}
+    >
+      <input
+        role="combobox"
+        aria-label={q.text}
+        aria-expanded={open && matches.length > 0}
+        aria-controls={listId}
+        aria-autocomplete="list"
+        autoComplete="off"
+        placeholder="Pradėk rašyti vardą…"
+        value={text}
+        onFocus={() => setOpen(true)}
+        onChange={(e) => type(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setOpen(true);
+            setHi((h) => Math.min(h + 1, matches.length - 1));
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setHi((h) => Math.max(h - 1, 0));
+          } else if (e.key === "Enter" && open && matches[hi]) {
+            e.preventDefault();
+            choose(matches[hi]);
+          } else if (e.key === "Escape") setOpen(false);
+        }}
+        className={value ? "pr-9!" : ""}
+      />
+      {value && <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-bold text-good">✓</span>}
+      {open && matches.length > 0 && (
+        <ul id={listId} role="listbox" className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-[10px] border border-line bg-card py-1 shadow-lg">
+          {matches.map((o, i) => (
+            <li key={o} role="option" aria-selected={i === hi}>
+              <button
+                type="button"
+                tabIndex={-1}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setHi(i)}
+                onClick={() => choose(o)}
+                className={`block w-full px-3 py-2 text-left text-sm ${i === hi ? "bg-orange-soft" : ""}`}
+              >
+                {o}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {text.trim() && !value && (
+        <p className="mt-1 text-[13px] text-orange-deep">
+          {matches.length ? "Pasirink vardą iš sąrašo." : "Tokio vardo sąraše nėra – pabandyk kitaip."}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function PendingNotice() {
   return (
     <div className="card border-orange">
-      <h3 className="text-xl font-extrabold uppercase">Sending your answers…</h3>
+      <h3 className="text-xl font-extrabold uppercase">Siunčiami tavo atsakymai…</h3>
       <p className="mt-1 text-sm text-muted">
-        They&apos;re safely stored on this device and will be sent to the answer sheet as soon as there&apos;s a connection. Keep this page
-        open or come back later — you won&apos;t need to answer again.
+        Jie saugiai išsaugoti šiame įrenginyje ir bus išsiųsti, kai tik atsiras ryšys. Gali palikti puslapį atidarytą arba sugrįžti vėliau –
+        iš naujo atsakinėti nereikės.
       </p>
     </div>
   );
@@ -286,11 +364,11 @@ function MyAnswers({ stage, submission, everyone }: { stage: Stage; submission: 
   return (
     <div className="card">
       <div className="flex flex-wrap items-center gap-2">
-        <Tag tone="good">Submitted</Tag>
-        <span className="text-sm text-muted">{new Date(submission.submittedAt).toLocaleString()} · saved in the answer sheet</span>
+        <Tag tone="good">Pateikta</Tag>
+        <span className="text-sm text-muted">{fmtDateTime(submission.submittedAt)} · išsaugota</span>
         {scored && (
           <span className="ml-auto font-display text-2xl font-extrabold text-orange">
-            {scoreAnswers(stage, submission.answers, everyone)} / {maxPoints(stage)} pts
+            {scoreAnswers(stage, submission.answers, everyone)} / {maxPoints(stage)} tšk.
           </span>
         )}
       </div>
@@ -306,9 +384,7 @@ function MyAnswers({ stage, submission, everyone }: { stage: Stage; submission: 
               </span>
               <b>{formatAnswer(q, answers[q.id])}</b>
               {ok === true && <Tag tone="good">+{q.points}</Tag>}
-              {ok === false && (
-                <span className="text-[13px] text-bad">✗ {formatAnswer(q, Array.isArray(q.answer) ? q.answer[0] : (q.answer ?? undefined))}</span>
-              )}
+              {ok === false && <span className="text-[13px] text-bad">✗ {formatAnswer(q, firstAnswer(q))}</span>}
             </li>
           );
         })}
@@ -324,12 +400,12 @@ function EveryonesAnswers({ league, stage, submissions, me }: { league: League; 
   const td = "border-b border-line px-2 py-2 text-[13px] align-top";
   return (
     <div className="card mt-4 overflow-x-auto">
-      <h3 className="text-xl font-extrabold uppercase">Everyone&apos;s answers</h3>
+      <h3 className="text-xl font-extrabold uppercase">Visų atsakymai</h3>
       <table className="mt-2 w-full border-collapse">
         <thead>
           <tr>
-            <th className={th}>Question</th>
-            <th className={th}>Correct</th>
+            <th className={th}>Klausimas</th>
+            <th className={th}>Teisingas</th>
             {league.players.map((name) => (
               <th key={name} className={`${th} ${name === me ? "text-orange" : ""}`}>
                 {name}
@@ -343,17 +419,19 @@ function EveryonesAnswers({ league, stage, submissions, me }: { league: League; 
               <td className={`${td} min-w-52`}>
                 <b className="text-orange">{i + 1}.</b> {q.text}{" "}
                 <span className="text-muted">
-                  ({q.points} pts{q.reveal ? ` · ${q.reveal}` : ""})
+                  ({q.points} tšk.{q.reveal ? ` · ${q.reveal}` : ""})
                 </span>
               </td>
-              <td className={`${td} font-semibold`}>{q.answer == null ? (
-                  <span className="text-muted">{q.reveal ?? "tbd"}</span>
+              <td className={`${td} font-semibold`}>
+                {q.answer == null ? (
+                  <span className="text-muted">{q.reveal ?? "—"}</span>
                 ) : (
                   <>
-                    {formatAnswer(q, Array.isArray(q.answer) ? q.answer[0] : q.answer)}
-                    {q.closest && <span className="block text-[11px] font-normal text-muted">closest wins</span>}
+                    {formatAnswer(q, firstAnswer(q))}
+                    {q.closest && <span className="block text-[11px] font-normal text-muted">laimi arčiausias</span>}
                   </>
-                )}</td>
+                )}
+              </td>
               {subs.map((s, j) => {
                 const v = s?.answers?.[q.id];
                 const ok = s ? isCorrect(q, v, everyone.map((a) => a[q.id])) : null;
@@ -367,7 +445,7 @@ function EveryonesAnswers({ league, stage, submissions, me }: { league: League; 
           ))}
           <tr>
             <td className={`${td} font-bold`} colSpan={2}>
-              Points
+              Taškai
             </td>
             {subs.map((s, j) => (
               <td key={j} className={`${td} font-bold`}>
