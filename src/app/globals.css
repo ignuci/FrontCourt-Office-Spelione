@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Brand colours come from the FrontCourt Office logo: purple #3F3454, orange #E77B38. */
+:root {
+  --c-purple: #3f3454;
+  --c-purple-deep: #2c2440;
+  --c-purple-line: #524470;
+  --c-orange: #e77b38;
+  --c-orange-deep: #c9632a;
+
+  --c-bg: #f6f4f9;
+  --c-card: #ffffff;
+  --c-ink: #211b2e;
+  --c-muted: #6b6480;
+  --c-line: #e2ddeb;
+  --c-purple-soft: #ece8f3;
+  --c-on-purple-soft: #3f3454;
+  --c-orange-soft: #fcebdf;
+  --c-good: #2e8b57;
+  --c-good-soft: #e3f3ea;
+  --c-bad: #c0392b;
+  --c-bad-soft: #f8e1de;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #17131f;
+    --c-card: #221c2e;
+    --c-ink: #f1eef7;
+    --c-muted: #a69fb8;
+    --c-line: #352d45;
+    --c-purple-soft: #2e2640;
+    --c-on-purple-soft: #f1eef7;
+    --c-orange-soft: #3a2618;
+    --c-good-soft: #173326;
+    --c-bad-soft: #3a1c19;
+  }
+}
+
+@theme inline {
+  --color-purple: var(--c-purple);
+  --color-purple-deep: var(--c-purple-deep);
+  --color-purple-line: var(--c-purple-line);
+  --color-purple-soft: var(--c-purple-soft);
+  --color-on-purple-soft: var(--c-on-purple-soft);
+  --color-orange: var(--c-orange);
+  --color-orange-deep: var(--c-orange-deep);
+  --color-orange-soft: var(--c-orange-soft);
+  --color-bg: var(--c-bg);
+  --color-card: var(--c-card);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --color-good: var(--c-good);
+  --color-good-soft: var(--c-good-soft);
+  --color-bad: var(--c-bad);
+  --color-bad-soft: var(--c-bad-soft);
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-barlow), var(--font-inter), system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-display tracking-wide;
+  }
+  input, select {
+    @apply w-full rounded-[10px] border border-line bg-card px-3 py-2 text-sm text-ink;
+  }
+  input:focus, select:focus {
+    @apply outline-2 outline-orange -outline-offset-1 border-transparent;
+  }
+  input:disabled, select:disabled {
+    @apply bg-bg text-muted;
+  }
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-card p-5 shadow-[0_1px_2px_rgba(33,27,46,.06),0_4px_16px_rgba(33,27,46,.06)];
+}
