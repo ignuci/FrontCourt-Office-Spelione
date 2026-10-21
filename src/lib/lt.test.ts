@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { plural, sheetMessage } from "./lt.ts";
+import { plural, sheetMessage, vocative } from "./lt.ts";
 
 describe("plural", () => {
   const forms: [string, string, string] = ["klausimas", "klausimai", "klausimų"];
@@ -21,5 +21,15 @@ describe("sheetMessage", () => {
   it("translates the sheet's refusals", () => {
     assert.match(sheetMessage("Ruduo is locked — submissions are closed."), /užrakintas/);
     assert.match(sheetMessage("That name is not on the player list."), /sąraše/);
+  });
+});
+
+describe("vocative", () => {
+  it("works for every player in the league", () => {
+    const expected: Record<string, string> = {
+      Arnas: "Arnai", Danielius: "Danieliau", Domantas: "Domantai", Henrikas: "Henrikai", Ignas: "Ignai", Jurgis: "Jurgi",
+      Justas: "Justai", Laurynas: "Laurynai", Liutauras: "Liutaurai", Marius: "Mariau", Simas: "Simai", Titas: "Titai",
+    };
+    for (const [n, v] of Object.entries(expected)) assert.equal(vocative(n), v);
   });
 });

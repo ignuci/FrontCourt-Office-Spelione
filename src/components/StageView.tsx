@@ -38,14 +38,24 @@ export function StageView(p: Props) {
         <div className="min-w-0 flex-1">
           <h2 className="text-4xl font-extrabold uppercase">{stage.name}</h2>
           <p className="text-sm text-muted">
-            {status === "locked" ? `Užrakinta ${fmtDateTime(stage.lock)}` : status === "open" ? `Užsirakina ${fmtDateTime(stage.lock)}` : "Dar neatidaryta"}
-            {stage.questions.length > 0 && ` · ${plural(stage.questions.length, QUESTIONS)} · iki ${maxPoints(stage)} tšk.`}
+            {[
+              status === "locked" ? `Užrakinta ${fmtDateTime(stage.lock)}` : status === "soon" ? "Dar neatidaryta" : null,
+              stage.questions.length > 0 ? `${plural(stage.questions.length, QUESTIONS)} · iki ${maxPoints(stage)} tšk.` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
         </div>
         {status === "open" && <Tag tone="open">Atidaryta</Tag>}
         {status === "locked" && <Tag tone="lock">Užrakinta</Tag>}
         {status === "soon" && <Tag tone="lock">Netrukus</Tag>}
       </div>
+
+      {status === "open" && (
+        <div className="card mb-4 text-center">
+          <Countdown target={stage.lock} label="Atsakymams pateikti liko" />
+        </div>
+      )}
 
       {stage.note && status !== "soon" && <p className="mb-4 rounded-xl bg-orange-soft px-3.5 py-2.5 text-[13px] text-orange-deep">{stage.note}</p>}
 
@@ -105,13 +115,22 @@ function Meta({ q, inline = false }: { q: Question; inline?: boolean }) {
 /* ---------- not open yet ---------- */
 
 function ComingSoon({ stage }: { stage: Stage }) {
+  return (
+    <div className="card text-center">
+      {stage.note && <p className="mx-auto mb-4 max-w-xl text-lg">{stage.note}</p>}
+      {stage.opens ? <Countdown target={stage.opens} label="Iki atidarymo liko" /> : <p className="text-muted">Data bus paskelbta netrukus.</p>}
+    </div>
+  );
+}
+
+/** Big days / hours / minutes / seconds countdown to a moment, with the date underneath. */
+function Countdown({ target, label }: { target: string; label: string }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  const target = stage.opens ? Date.parse(stage.opens) : NaN;
-  const left = Math.max(0, target - now);
+  const left = Math.max(0, Date.parse(target) - now);
   const parts: [number, string][] = [
     [Math.floor(left / 86_400_000), "d."],
     [Math.floor(left / 3_600_000) % 24, "val."],
@@ -119,25 +138,18 @@ function ComingSoon({ stage }: { stage: Stage }) {
     [Math.floor(left / 1000) % 60, "sek."],
   ];
   return (
-    <div className="card text-center">
-      {stage.note && <p className="mx-auto mb-4 max-w-xl text-lg">{stage.note}</p>}
-      {Number.isNaN(target) ? (
-        <p className="text-muted">Data bus paskelbta netrukus.</p>
-      ) : (
-        <>
-          <p className="text-sm font-semibold uppercase tracking-wider text-muted">Iki atidarymo liko</p>
-          <div className="mt-3 flex justify-center gap-2 sm:gap-3" role="timer" aria-live="off">
-            {parts.map(([n, label]) => (
-              <div key={label} className="w-18 rounded-xl bg-purple py-3 text-white sm:w-22">
-                <div className="font-display text-4xl font-extrabold leading-none tabular-nums sm:text-5xl">{String(n).padStart(2, "0")}</div>
-                <div className="mt-1 text-[11px] uppercase tracking-wider opacity-75">{label}</div>
-              </div>
-            ))}
+    <>
+      <p className="text-sm font-semibold uppercase tracking-wider text-muted">{label}</p>
+      <div className="mt-3 flex justify-center gap-2 sm:gap-3" role="timer" aria-live="off">
+        {parts.map(([n, unit]) => (
+          <div key={unit} className="w-18 rounded-xl bg-purple py-3 text-white sm:w-22">
+            <div className="font-display text-4xl font-extrabold leading-none tabular-nums sm:text-5xl">{String(n).padStart(2, "0")}</div>
+            <div className="mt-1 text-[11px] uppercase tracking-wider opacity-75">{unit}</div>
           </div>
-          <p className="mt-3 text-[13px] text-muted">{fmtDateTime(stage.opens!)}</p>
-        </>
-      )}
-    </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[13px] text-muted">{fmtDateTime(target)}</p>
+    </>
   );
 }
 
@@ -192,8 +204,15 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
           <li key={q.id} className="card">
             <div className="flex items-start gap-3">
               <span className="font-display text-2xl font-extrabold leading-none text-orange">{i + 1}</span>
-              <p className="flex-1 font-semibold">{q.text}</p>
-              <Meta q={q} />
+              <div className="flex-1">
+                <p className="font-semibold">{q.text}</p>
+                <div className="mt-1.5 sm:hidden">
+                  <Meta q={q} inline />
+                </div>
+              </div>
+              <div className="max-sm:hidden">
+                <Meta q={q} />
+              </div>
             </div>
             <div className="mt-3">
               <AnswerInput q={q} value={draft[q.id] ?? ""} onChange={(v) => onAnswer(q.id, v)} />

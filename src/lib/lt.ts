@@ -19,3 +19,17 @@ export function sheetMessage(msg: string): string {
   if (/unknown stage/i.test(msg)) return "Nežinomas etapas.";
   return msg;
 }
+
+/** Name in the vocative case, for addressing someone: Ignas → Ignai, Jurgis → Jurgi, Marius → Mariau. */
+export function vocative(name: string): string {
+  const rules: [RegExp, string][] = [
+    [/ius$/, "iau"],
+    [/as$/, "ai"],
+    [/is$/, "i"],
+    [/ys$/, "y"],
+    [/us$/, "au"],
+    [/ė$/, "e"],
+  ];
+  for (const [re, to] of rules) if (re.test(name)) return name.replace(re, to);
+  return name;
+}

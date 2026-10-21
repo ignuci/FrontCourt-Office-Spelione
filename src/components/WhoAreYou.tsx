@@ -13,7 +13,7 @@ export function WhoAreYou({ players, onChoose }: { players: string[]; onChoose: 
   return (
     <div className="mx-auto max-w-3xl py-6">
       <h2 className="text-center text-4xl font-extrabold uppercase">Kas tu?</h2>
-      <p className="mt-1 text-center text-muted">Pasirink savo vardą – tavo spėjimai bus išsaugoti juo.</p>
+      <p className="mt-1 text-center text-muted">Pasirink savo vardą</p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {players.map((p) => (

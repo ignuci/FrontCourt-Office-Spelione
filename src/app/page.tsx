@@ -8,6 +8,7 @@ import { WhoAreYou } from "@/components/WhoAreYou";
 import { useLeague } from "@/hooks/useLeague";
 import { useNow } from "@/hooks/useNow";
 import { stageStatus } from "@/lib/league";
+import { vocative } from "@/lib/lt";
 
 export default function Home() {
   const L = useLeague();
@@ -18,7 +19,7 @@ export default function Home() {
   const notify = useCallback((msg: string) => {
     setToast(msg);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setToast(null), 2800);
+    timer.current = setTimeout(() => setToast(null), 4000);
   }, []);
 
   // Start on the stage that's open now, otherwise the leaderboard.
@@ -44,7 +45,7 @@ export default function Home() {
             <h1 className="text-[28px] font-extrabold uppercase leading-none sm:text-[32px]">
               FrontCourt <span className="text-orange">Office</span>
             </h1>
-            <p className="mt-1 text-[13px] opacity-75">Spėlionė · NBA fantasy spėjimai · {L.league.season}</p>
+            <p className="mt-1 text-[13px] opacity-75">Spėlionė · NBA sezono spėjimai · {L.league.season}</p>
           </div>
           {L.player && (
             <div className="flex items-center gap-2 text-sm">
@@ -82,7 +83,7 @@ export default function Home() {
             players={L.league.players}
             onChoose={(p) => {
               L.choosePlayer(p);
-              notify("Labas! Sėkmės spėjant.");
+              notify(`Tegul visi spėjimai skrieja pro šalį, ${vocative(p)}`);
             }}
           />
         ) : (
@@ -125,7 +126,12 @@ export default function Home() {
           </>
         )}
       </main>
-      <footer className="px-4 pb-8 text-center text-xs text-muted">FrontCourt Office Spėlionė · sukurta fanų, nesusijusi su NBA.</footer>
+      <footer className="px-4 pb-8 text-center text-xs text-muted">
+        <p className="mb-1.5 italic opacity-40 transition-opacity hover:opacity-100" title="🤫">
+          This ain&apos;t no state property. This is private property.
+        </p>
+        FrontCourt Office Spėlionė · sukurta fanų, nesusijusi su NBA.
+      </footer>
       <Toast message={toast} />
     </>
   );
