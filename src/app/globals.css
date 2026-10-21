@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Brand colours come from the FrontCourt Office logo: purple #3F3454, orange #E77B38. */
+/* FrontCourt Office brand colours: purple #3F3454, orange #E77B38. */
 :root {
   --c-purple: #3f3454;
   --c-purple-deep: #2c2440;

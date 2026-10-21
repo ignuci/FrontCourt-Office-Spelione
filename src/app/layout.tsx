@@ -11,7 +11,7 @@ const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 export const metadata: Metadata = {
   title: "FrontCourt Office Spėlionė",
   description: "Fantasy NBA predictions for the whole season.",
-  icons: { icon: `${base}/logo.png` },
+  icons: { icon: `${base}/icon.svg` },
 };
 
 export const viewport: Viewport = { themeColor: "#3F3454" };

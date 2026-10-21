@@ -4,22 +4,30 @@ Fantasy NBA predictions for the whole season — game picks, season awards, and 
 
 **Stack:** Next.js (static export) · React · TypeScript · Tailwind CSS · `node:test` · GitHub Pages · GitHub Actions
 
-## What it does
+## How it works
 
-- **Game picks** — add matchups, pick winners, optionally guess the margin. Picks lock at tip-off. Enter the final score afterwards.
-- **Season picks** — champion, Finals runner-up, top seeds, worst record, MVP and other awards. All lock on a date you choose.
-- **Props** — write your own questions with any set of answers and a points value.
-- **Leaderboard** — one point per correct winner, +1 if the margin is within 3; season picks and props score their listed points.
-- **Several players** — add your league in the Data tab and switch who's predicting from the header.
+- **Pick your name** — the first screen lists the league's players. After confirming, the device remembers you.
+- **Four stages** — Ruduo, Kalėdos, All-Star, Pavasaris. Each has 12 questions and its own lock date. Questions are picked from a team list, from a set of options, or answered in your own words (or a number). Every question shows what it's worth.
+- **Submit once** — a stage's answers are final once submitted. Drafts are kept on the device while you fill them in.
+- **Leaderboard** — the players from the list, points per stage and in total, counted once the correct answers are entered.
+- The old Game picks / Season picks / Props pages are kept for inspiration only and will be removed.
 
-## Where data is saved
+## Where answers are saved
 
-There's no server. Everything is one JSON file:
+In a Google Sheet you own — one row per person per stage. Setup: [`apps-script/README.md`](apps-script/README.md).
 
-- It's always kept in your browser (localStorage), so closing the tab never loses picks.
-- In Chrome, Edge or Opera you can **link a JSON file** on your computer from the Data tab — every change is written to it automatically, and the link is remembered on your next visit.
-- In any browser you can **download** the JSON and **load** it again later (or on another device).
-- Optional: commit a `public/data.json` and new visitors start from that file.
+- The sheet refuses a second submission for the same stage, names not on the list, and anything after the lock.
+- Other people's answers stay hidden until a stage locks.
+- A copy stays on the person's device; if the connection drops while submitting, it's sent automatically later.
+
+## Editing the league
+
+Everything lives in [`public/league.json`](public/league.json): `players`, `sheetUrl`, and each stage's `lock` date and `questions`.
+
+- Question types: `team` (optionally `"conf": "E"` or `"W"`), `choice` (with `options`), `text`, `number` (optional `tolerance`).
+- Set `answer` when the result is known. For `text` it can be a list of accepted spellings, e.g. `["Nikola Jokić", "Jokic"]`. Teams use codes like `"OKC"`.
+- **Never change a question's `id` after people have answered** — answers are stored by id.
+- `npm test` checks the file (12 questions per stage, valid answers, no duplicate ids) and the deploy stops if it's wrong.
 
 ## Development
 

@@ -1,140 +1,152 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Dashboard } from "@/components/Dashboard";
-import { DataPanel } from "@/components/DataPanel";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { GamePicks } from "@/components/GamePicks";
-import { LeaderboardTable } from "@/components/Leaderboard";
 import { Props } from "@/components/Props";
 import { SeasonPicks } from "@/components/SeasonPicks";
-import { SectionHead, Toast } from "@/components/ui";
+import { StageView } from "@/components/StageView";
+import { Standings } from "@/components/Standings";
+import { Toast } from "@/components/ui";
+import { WhoAreYou } from "@/components/WhoAreYou";
+import { useLeague } from "@/hooks/useLeague";
 import { useNow, usePredictions } from "@/hooks/usePredictions";
-import { leaderboard } from "@/lib/scoring";
-import { setActivePlayer } from "@/lib/state";
-import { supportsLinkedFiles } from "@/lib/storage";
+import { stageStatus } from "@/lib/league";
 
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-
-const TABS = [
-  ["dash", "Dashboard"],
-  ["games", "Game picks"],
-  ["season", "Season picks"],
-  ["props", "Props"],
-  ["board", "Leaderboard"],
-  ["data", "Data"],
+// Old tabs kept as inspiration while the stage questions are written. Remove when no longer needed.
+const IDEAS = [
+  ["idea-games", "Game picks"],
+  ["idea-season", "Season picks"],
+  ["idea-props", "Props"],
 ] as const;
-type Tab = (typeof TABS)[number][0];
 
 export default function Home() {
-  const [tab, setTab] = useState<Tab>("dash");
+  const L = useLeague();
+  const now = useNow();
+  const [tab, setTab] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [canLink, setCanLink] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const notify = useCallback((msg: string) => {
     setToast(msg);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setToast(null), 2800);
   }, []);
-  const p = usePredictions(notify);
-  const now = useNow();
+  const ideas = usePredictions(notify);
 
-  useEffect(() => setCanLink(supportsLinkedFiles()), []);
+  // Start on the stage that's open now, otherwise the leaderboard.
+  useEffect(() => {
+    if (tab) return;
+    const open = L.league.stages.find((s) => stageStatus(s, now) === "open");
+    setTab(open?.id ?? "board");
+  }, [tab, L.league.stages, now]);
 
-  const go = (t: Tab) => {
+  const go = (t: string) => {
     setTab(t);
     window.scrollTo({ top: 0 });
   };
 
-  const data = p.data;
-  const viewKey = data ? `${p.revision}-${data.activePlayer}` : "";
+  const stage = L.league.stages.find((s) => s.id === tab);
+  const showPicker = L.ready && !L.player;
 
   return (
     <>
       <header className="relative overflow-hidden bg-purple text-white">
         <div aria-hidden className="absolute -right-16 -top-10 size-64 rounded-full border-[28px] border-orange opacity-20" />
-        <div className="relative mx-auto flex max-w-[1100px] flex-wrap items-center gap-3.5 px-4 pt-4.5 sm:flex-nowrap">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`${BASE}/logo.png`} alt="FrontCourt Office logo" width={52} height={56} className="h-14 w-13 flex-none rounded-[10px] object-cover ring-3 ring-white/10" />
+        <div className="relative mx-auto flex max-w-[1100px] flex-wrap items-center gap-3 px-4 pt-5">
           <div className="min-w-0 flex-1">
-            <h1 className="text-[26px] font-extrabold uppercase leading-none sm:text-[28px]">
+            <h1 className="text-[28px] font-extrabold uppercase leading-none sm:text-[32px]">
               FrontCourt <span className="text-orange">Office</span>
             </h1>
-            <p className="mt-1 text-[13px] opacity-75">Spėlionė · Fantasy NBA predictions{data && ` · ${data.season} season`}</p>
+            <p className="mt-1 text-[13px] opacity-75">Spėlionė · Fantasy NBA predictions · {L.league.season}</p>
           </div>
-          {data && (
-            <div className="flex w-full items-center gap-2 sm:w-auto">
-              <label htmlFor="player" className="whitespace-nowrap text-xs opacity-75">
-                Predicting as
-              </label>
-              <select
-                id="player"
-                value={data.activePlayer}
-                onChange={(e) => p.update((d) => setActivePlayer(d, e.target.value))}
-                className="flex-1 rounded-full! border-purple-line! bg-purple-deep! px-3! py-1.5! text-white! sm:max-w-44"
+          {L.player && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="rounded-full bg-purple-deep px-3 py-1.5 font-semibold">{L.player}</span>
+              <button
+                className="text-xs underline opacity-75 hover:opacity-100"
+                onClick={() => confirm(`Switch away from ${L.player}? Submitted answers stay saved.`) && L.forgetPlayer()}
               >
-                {data.players.map((pl) => (
-                  <option key={pl.id} value={pl.id}>
-                    {pl.name}
-                  </option>
-                ))}
-              </select>
+                Not you?
+              </button>
             </div>
           )}
         </div>
-        <nav className="relative mx-auto flex max-w-[1100px] gap-1 overflow-x-auto px-4 pt-3.5 [scrollbar-width:none]" aria-label="Sections">
-          {TABS.map(([id, label]) => (
-            <button
-              key={id}
-              onClick={() => go(id)}
-              aria-current={tab === id ? "page" : undefined}
-              className={`whitespace-nowrap rounded-t-[10px] px-3.5 py-2.5 font-display text-lg font-bold uppercase ${
-                tab === id ? "bg-bg text-purple dark:text-orange" : "text-white opacity-70 hover:opacity-100"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
+        {!showPicker && L.player && (
+          <nav className="relative mx-auto flex max-w-[1100px] items-end gap-1 overflow-x-auto px-4 pt-4 [scrollbar-width:none]" aria-label="Sections">
+            {L.league.stages.map((s) => (
+              <NavTab key={s.id} on={tab === s.id} onClick={() => go(s.id)} dot={stageStatus(s, now) === "open" && !L.mine[s.id]}>
+                {s.name}
+              </NavTab>
+            ))}
+            <NavTab on={tab === "board"} onClick={() => go("board")}>
+              Leaderboard
+            </NavTab>
+            <span className="mx-2 mb-2.5 h-5 w-px flex-none bg-white/25" aria-hidden />
+            {IDEAS.map(([id, label]) => (
+              <NavTab key={id} on={tab === id} onClick={() => go(id)} small>
+                {label}
+              </NavTab>
+            ))}
+          </nav>
+        )}
+        {(showPicker || !L.player) && <div className="h-5" />}
       </header>
 
-      <main className="mx-auto max-w-[1100px] px-4 pb-16 pt-5.5">
-        {!data ? (
-          <p className="py-20 text-center text-muted">Loading your picks…</p>
+      <main className="mx-auto max-w-[1100px] px-4 pb-16 pt-6">
+        {!L.ready ? (
+          <p className="py-20 text-center text-muted">Loading…</p>
+        ) : !L.player ? (
+          <WhoAreYou players={L.league.players} onChoose={(p) => {
+              L.choosePlayer(p);
+              notify(`Hi, ${p}!`);
+            }} />
         ) : (
           <>
-            <SaveBanner file={p.file} onReconnect={p.reconnect} onOpenData={() => go("data")} />
-            <div key={viewKey}>
-              {tab === "dash" && <Dashboard data={data} now={now} go={go} />}
-              {tab === "games" && <GamePicks data={data} now={now} update={p.update} notify={notify} />}
-              {tab === "season" && <SeasonPicks data={data} now={now} update={p.update} />}
-              {tab === "props" && <Props data={data} now={now} update={p.update} notify={notify} />}
-              {tab === "board" && (
-                <section>
-                  <SectionHead title="Leaderboard">
-                    Games: 1 pt per correct winner, +1 if your margin is within 3. Season picks and props score their listed points.
-                  </SectionHead>
-                  <div className="card overflow-x-auto">
-                    <LeaderboardTable rows={leaderboard(data)} me={data.activePlayer} />
-                  </div>
-                </section>
-              )}
-              {tab === "data" && (
-                <DataPanel
-                  data={data}
-                  file={p.file}
-                  canLink={canLink}
-                  update={p.update}
-                  notify={notify}
-                  onCreateFile={p.createFile}
-                  onOpenFile={p.openFile}
-                  onReconnect={p.reconnect}
-                  onUnlink={p.unlink}
-                  onDownload={p.download}
-                  onUpload={p.importUpload}
-                  onReset={p.reset}
-                />
-              )}
-            </div>
+            {L.sync.kind === "error" && (
+              <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-bad-soft px-3.5 py-2.5 text-[13px] text-bad">
+                <span className="flex-1">Can&apos;t reach the answer sheet right now: {L.sync.message}</span>
+                <button className="font-semibold underline" onClick={() => void L.refresh()}>
+                  Try again
+                </button>
+              </div>
+            )}
+            {!L.canSave && (
+              <div className="mb-4 rounded-xl bg-purple-soft px-3.5 py-2.5 text-[13px]">
+                Saving to the answer sheet isn&apos;t switched on yet. You can look around and fill in answers; submitting opens once it&apos;s set up.
+              </div>
+            )}
+
+            {stage && (
+              <StageView
+                key={`${stage.id}-${L.player}`}
+                league={L.league}
+                stage={stage}
+                player={L.player}
+                now={now}
+                draft={L.drafts[stage.id] ?? {}}
+                submission={L.mine[stage.id]}
+                submissions={L.submissions}
+                pending={L.isPending(stage.id)}
+                canSave={L.canSave}
+                onAnswer={(qid, v) => L.setAnswer(stage.id, qid, v)}
+                onSubmit={async () => {
+                  const r = await L.submit(stage.id);
+                  if (r.ok) notify(`${stage.name} submitted — good luck!`);
+                  return r;
+                }}
+              />
+            )}
+            {tab === "board" && <Standings league={L.league} submissions={L.submissions} me={L.player} now={now} />}
+
+            {tab?.startsWith("idea-") && (
+              <>
+                <p className="mb-4 rounded-xl bg-orange-soft px-3.5 py-2.5 text-[13px] text-orange-deep">
+                  Inspiration only — these pages aren&apos;t part of the competition and will be removed.
+                </p>
+                {ideas.data && tab === "idea-games" && <GamePicks data={ideas.data} now={now} update={ideas.update} notify={notify} />}
+                {ideas.data && tab === "idea-season" && <SeasonPicks data={ideas.data} now={now} update={ideas.update} />}
+                {ideas.data && tab === "idea-props" && <Props data={ideas.data} now={now} update={ideas.update} notify={notify} />}
+              </>
+            )}
           </>
         )}
       </main>
@@ -144,39 +156,17 @@ export default function Home() {
   );
 }
 
-function SaveBanner({ file, onReconnect, onOpenData }: { file: ReturnType<typeof usePredictions>["file"]; onReconnect: () => void; onOpenData: () => void }) {
-  const box = "mb-4 flex items-center gap-2.5 rounded-xl bg-purple-soft px-3.5 py-2.5 text-[13px]";
-  if (file.kind === "linked")
-    return (
-      <div className={box}>
-        <span className="size-2 flex-none rounded-full bg-good" />
-        <span>
-          Saving to <b>{file.name}</b> on this computer.
-        </span>
-      </div>
-    );
-  if (file.kind === "reconnect")
-    return (
-      <div className={box}>
-        <span className="size-2 flex-none rounded-full bg-orange" />
-        <span className="flex-1">
-          Saved in this browser. <b>{file.name}</b> needs one click to keep saving.
-        </span>
-        <button className="font-semibold text-orange underline" onClick={onReconnect}>
-          Reconnect
-        </button>
-      </div>
-    );
+function NavTab({ on, onClick, children, small, dot }: { on: boolean; onClick: () => void; children: ReactNode; small?: boolean; dot?: boolean }) {
   return (
-    <div className={box}>
-      <span className="size-2 flex-none rounded-full bg-muted" />
-      <span>
-        Saved in this browser.{" "}
-        <button className="font-semibold text-orange underline" onClick={onOpenData}>
-          Link a JSON file
-        </button>{" "}
-        or download one to keep a copy.
-      </span>
-    </div>
+    <button
+      onClick={onClick}
+      aria-current={on ? "page" : undefined}
+      className={`relative whitespace-nowrap rounded-t-[10px] font-display font-bold uppercase ${small ? "px-2.5 py-2 text-sm" : "px-3.5 py-2.5 text-lg"} ${
+        on ? "bg-bg text-purple dark:text-orange" : `text-white hover:opacity-100 ${small ? "opacity-50" : "opacity-75"}`
+      }`}
+    >
+      {children}
+      {dot && <span className="absolute right-1.5 top-2 size-2 rounded-full bg-orange" aria-label="open" />}
+    </button>
   );
 }
