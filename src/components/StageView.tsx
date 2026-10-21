@@ -380,6 +380,17 @@ function PendingNotice() {
 function MyAnswers({ stage, submission, everyone }: { stage: Stage; submission: Submission; everyone: Answers[] }) {
   const answers = submission.answers ?? {};
   const scored = stage.questions.some((q) => q.answer != null);
+  if (!submission.answers) {
+    return (
+      <div className="card">
+        <div className="flex flex-wrap items-center gap-2">
+          <Tag tone="good">Pateikta</Tag>
+          <span className="text-sm text-muted">{fmtDateTime(submission.submittedAt)} · išsaugota</span>
+        </div>
+        <p className="mt-2 text-sm text-muted">Tavo atsakymai saugiai išsaugoti. Šiame įrenginyje jų nėra, tad juos pamatysi, kai etapas užsirakins.</p>
+      </div>
+    );
+  }
   return (
     <div className="card">
       <div className="flex flex-wrap items-center gap-2">

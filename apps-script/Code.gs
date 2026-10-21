@@ -9,7 +9,8 @@
  *  - only names listed in league.json can submit
  *  - one submission per person per stage — the first one is final
  *  - no submissions after a stage's lock time
- *  - other people's answers stay hidden until the stage locks
+ *  - everyone's answers (your own too) stay hidden until the stage locks;
+ *    before that, the sheet only tells who has submitted and when
  */
 
 // Where the site publishes its league.json (players, stages, lock dates).
@@ -22,10 +23,8 @@ function doGet(e) {
   const now = new Date();
   const locked = {};
   league.stages.forEach(function (s) { locked[s.id] = new Date(s.lock) <= now; });
-  const me = (e && e.parameter && e.parameter.player) || '';
   const submissions = rows_().map(function (r) {
-    const visible = locked[r.stage] || r.player === me;
-    return { player: r.player, stage: r.stage, submittedAt: r.submittedAt, answers: visible ? r.answers : null };
+    return { player: r.player, stage: r.stage, submittedAt: r.submittedAt, answers: locked[r.stage] ? r.answers : null };
   });
   return json_({ ok: true, submissions: submissions, serverTime: now.toISOString() });
 }
@@ -40,10 +39,14 @@ function doPost(e) {
     if (!stage) return json_({ ok: false, error: 'Unknown stage.' });
     if (league.players.indexOf(body.player) === -1) return json_({ ok: false, error: 'That name is not on the player list.' });
 
+    const isLocked = new Date(stage.lock) <= new Date();
     const existing = rows_().filter(function (r) { return r.player === body.player && r.stage === body.stage; })[0];
-    if (existing) return json_({ ok: true, alreadySubmitted: true, submission: existing });
+    if (existing) {
+      // Already submitted: say so, but don't hand the answers back before the lock.
+      return json_({ ok: true, alreadySubmitted: true, submission: { player: existing.player, stage: existing.stage, submittedAt: existing.submittedAt, answers: isLocked ? existing.answers : null } });
+    }
 
-    if (new Date(stage.lock) <= new Date()) return json_({ ok: false, error: stage.name + ' is locked — submissions are closed.' });
+    if (isLocked) return json_({ ok: false, error: stage.name + ' is locked — submissions are closed.' });
 
     const answers = {};
     stage.questions.forEach(function (q) {

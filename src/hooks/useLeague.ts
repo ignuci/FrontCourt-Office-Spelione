@@ -72,9 +72,14 @@ export function useLeague() {
       // The sheet is the master copy: mirror exactly what it has for us. If a row was
       // deleted in the sheet (e.g. a test run), that stage opens up again on this device.
       // Answers still waiting to be sent live in the outbox, so nothing is lost here.
+      // Before a stage locks the sheet hides answers (even ours), so keep this device's copy of them.
       if (player) {
+        const kept = read<Record<string, Submission>>(kMine(player), {});
         const next: Record<string, Submission> = {};
-        for (const s of subs) if (s.player === player && s.answers) next[s.stage] = s;
+        for (const s of subs) {
+          if (s.player !== player) continue;
+          next[s.stage] = s.answers ? s : { ...s, answers: kept[s.stage]?.answers ?? null };
+        }
         write(kMine(player), next);
         setMine(next);
       }
