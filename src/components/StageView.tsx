@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  answeredCount, formatAnswer, isCorrect, maxPoints, scoreAnswers, stageStatus,
+  answeredCount, formatAnswer, isCorrect, maxPoints, scoreAnswers, stageAnswers, stageStatus,
   type Answers, type League, type Question, type Stage, type Submission,
 } from "@/lib/league";
 import { TeamSelect } from "./TeamSelect";
@@ -50,7 +50,7 @@ export function StageView(p: Props) {
       {status === "soon" ? (
         <ComingSoon stage={stage} />
       ) : p.submission ? (
-        <MyAnswers stage={stage} submission={p.submission} />
+        <MyAnswers stage={stage} submission={p.submission} everyone={stageAnswers(p.league, stage.id, p.submissions)} />
       ) : status === "open" ? (
         p.pending ? (
           <PendingNotice />
@@ -85,6 +85,18 @@ export function StageView(p: Props) {
 
       {status === "locked" && <EveryonesAnswers league={p.league} stage={stage} submissions={p.submissions} me={p.player} />}
     </section>
+  );
+}
+
+/** Points and, if set, when the answer is revealed. */
+function Meta({ q, inline = false }: { q: Question; inline?: boolean }) {
+  return (
+    <span className={inline ? "ml-1 inline-flex flex-wrap items-center gap-1 align-middle" : "flex flex-none flex-col items-end gap-1"}>
+      <Points value={q.points} />
+      {q.reveal && (
+        <span className="whitespace-nowrap rounded-full bg-purple-soft px-1.5 py-0.5 text-[11px] font-semibold text-on-purple-soft">{q.reveal}</span>
+      )}
+    </span>
   );
 }
 
@@ -179,7 +191,7 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
             <div className="flex items-start gap-3">
               <span className="font-display text-2xl font-extrabold leading-none text-orange">{i + 1}</span>
               <p className="flex-1 font-semibold">{q.text}</p>
-              <Points value={q.points} />
+              <Meta q={q} />
             </div>
             <div className="mt-3">
               <AnswerInput q={q} value={draft[q.id] ?? ""} onChange={(v) => onAnswer(q.id, v)} />
@@ -209,6 +221,18 @@ function AnswerForm({ stage, draft, onAnswer, onSubmit, canSave }: Props) {
 function AnswerInput({ q, value, onChange }: { q: Question; value: string; onChange: (v: string) => void }) {
   if (q.type === "team") {
     return <TeamSelect aria-label={q.text} conf={q.conf} placeholder="— choose a team —" value={value} onChange={(e) => onChange(e.target.value)} />;
+  }
+  if (q.type === "choice" && (q.options?.length ?? 0) > 8) {
+    return (
+      <select aria-label={q.text} value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">— pasirink —</option>
+        {q.options?.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    );
   }
   if (q.type === "choice") {
     return (
@@ -256,7 +280,7 @@ function PendingNotice() {
 
 /* ---------- after submitting ---------- */
 
-function MyAnswers({ stage, submission }: { stage: Stage; submission: Submission }) {
+function MyAnswers({ stage, submission, everyone }: { stage: Stage; submission: Submission; everyone: Answers[] }) {
   const answers = submission.answers ?? {};
   const scored = stage.questions.some((q) => q.answer != null);
   return (
@@ -266,19 +290,19 @@ function MyAnswers({ stage, submission }: { stage: Stage; submission: Submission
         <span className="text-sm text-muted">{new Date(submission.submittedAt).toLocaleString()} · saved in the answer sheet</span>
         {scored && (
           <span className="ml-auto font-display text-2xl font-extrabold text-orange">
-            {scoreAnswers(stage, submission.answers)} / {maxPoints(stage)} pts
+            {scoreAnswers(stage, submission.answers, everyone)} / {maxPoints(stage)} pts
           </span>
         )}
       </div>
       <ol className="mt-3 divide-y divide-line">
         {stage.questions.map((q, i) => {
-          const ok = isCorrect(q, answers[q.id]);
+          const ok = isCorrect(q, answers[q.id], everyone.map((a) => a[q.id]));
           return (
             <li key={q.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2.5 text-sm">
               <span className="w-6 flex-none font-display text-lg font-bold text-orange">{i + 1}</span>
               <span className="min-w-48 flex-1 text-muted">
                 {q.text}
-                <Points value={q.points} />
+                <Meta q={q} inline />
               </span>
               <b>{formatAnswer(q, answers[q.id])}</b>
               {ok === true && <Tag tone="good">+{q.points}</Tag>}
@@ -295,6 +319,7 @@ function MyAnswers({ stage, submission }: { stage: Stage; submission: Submission
 
 function EveryonesAnswers({ league, stage, submissions, me }: { league: League; stage: Stage; submissions: Submission[]; me: string }) {
   const subs = league.players.map((name) => submissions.find((s) => s.stage === stage.id && s.player === name));
+  const everyone = stageAnswers(league, stage.id, submissions);
   const th = "border-b border-line px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted whitespace-nowrap";
   const td = "border-b border-line px-2 py-2 text-[13px] align-top";
   return (
@@ -316,12 +341,22 @@ function EveryonesAnswers({ league, stage, submissions, me }: { league: League; 
           {stage.questions.map((q, i) => (
             <tr key={q.id}>
               <td className={`${td} min-w-52`}>
-                <b className="text-orange">{i + 1}.</b> {q.text} <span className="text-muted">({q.points} pts)</span>
+                <b className="text-orange">{i + 1}.</b> {q.text}{" "}
+                <span className="text-muted">
+                  ({q.points} pts{q.reveal ? ` · ${q.reveal}` : ""})
+                </span>
               </td>
-              <td className={`${td} font-semibold`}>{q.answer == null ? <span className="text-muted">tbd</span> : formatAnswer(q, Array.isArray(q.answer) ? q.answer[0] : q.answer)}</td>
+              <td className={`${td} font-semibold`}>{q.answer == null ? (
+                  <span className="text-muted">{q.reveal ?? "tbd"}</span>
+                ) : (
+                  <>
+                    {formatAnswer(q, Array.isArray(q.answer) ? q.answer[0] : q.answer)}
+                    {q.closest && <span className="block text-[11px] font-normal text-muted">closest wins</span>}
+                  </>
+                )}</td>
               {subs.map((s, j) => {
                 const v = s?.answers?.[q.id];
-                const ok = s ? isCorrect(q, v) : null;
+                const ok = s ? isCorrect(q, v, everyone.map((a) => a[q.id])) : null;
                 return (
                   <td key={j} className={`${td} ${ok === true ? "bg-good-soft text-good" : ok === false ? "text-bad" : ""}`}>
                     {s ? formatAnswer(q, v) : <span className="text-muted">—</span>}
@@ -336,7 +371,7 @@ function EveryonesAnswers({ league, stage, submissions, me }: { league: League; 
             </td>
             {subs.map((s, j) => (
               <td key={j} className={`${td} font-bold`}>
-                {s ? scoreAnswers(stage, s.answers) : "—"}
+                {s ? scoreAnswers(stage, s.answers, everyone) : "—"}
               </td>
             ))}
           </tr>

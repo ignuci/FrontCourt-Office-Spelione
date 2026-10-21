@@ -7,7 +7,7 @@ Fantasy NBA predictions for the whole season — game picks, season awards, and 
 ## How it works
 
 - **Pick your name** — the first screen lists the league's players. After confirming, the device remembers you.
-- **Four stages** — Ruduo, Kalėdos, All-Star, Pavasaris. Each has 12 questions and its own lock date. Questions are picked from a team list, from a set of options, or answered in your own words (or a number). Every question shows what it's worth.
+- **Four stages** — Ruduo, Kalėdos, All-Star, Pavasaris. Each has its own questions (Ruduo: 15) and lock date. Questions are picked from a team list, from a set of options, or answered in your own words (or a number). Every question shows what it's worth.
 - **Submit once** — a stage's answers are final once submitted. Drafts are kept on the device while you fill them in.
 - **Leaderboard** — the players from the list, points per stage and in total, counted once the correct answers are entered.
 - The old Game picks / Season picks / Props pages are kept for inspiration only and will be removed.
@@ -24,10 +24,10 @@ In a Google Sheet you own — one row per person per stage. Setup: [`apps-script
 
 Everything lives in [`public/league.json`](public/league.json): `players`, `sheetUrl`, and each stage's `lock` date and `questions`.
 
-- Question types: `team` (optionally `"conf": "E"` or `"W"`), `choice` (with `options`), `text`, `number` (optional `tolerance`).
+- Question types: `team` (optionally `"conf": "E"` or `"W"`), `choice` (with `options`), `text`, `number` (optional `tolerance`, or `"closest": true` so the nearest guess wins). Add `"reveal"` to show when the answer comes out.
 - Set `answer` when the result is known. For `text` it can be a list of accepted spellings, e.g. `["Nikola Jokić", "Jokic"]`. Teams use codes like `"OKC"`.
 - **Never change a question's `id` after people have answered** — answers are stored by id.
-- `npm test` checks the file (12 questions per stage, valid answers, no duplicate ids) and the deploy stops if it's wrong.
+- `npm test` checks the file (valid answers and options, no duplicate ids) and the deploy stops if it's wrong.
 
 ## Development
 

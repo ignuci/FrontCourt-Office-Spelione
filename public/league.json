@@ -20,107 +20,225 @@
       "id": "ruduo",
       "name": "Ruduo",
       "lock": "2026-10-26T23:59:00+02:00",
-      "note": "DRAFT questions — replace with the real ones before sharing the site.",
       "questions": [
         {
-          "id": "ruduo-1",
+          "id": "ruduo-q01",
           "type": "team",
-          "points": 5,
-          "text": "Which team will have the best record in the league on November 30?",
+          "points": 2,
+          "reveal": "November 30 11:00",
+          "text": "Kuri komanda turės geriausią pergalių procentą visoje NBA iki lapkričio 30 d. 11:00 (LT laiko zona) (toliau - žiema)?",
           "answer": null
         },
         {
-          "id": "ruduo-2",
-          "type": "team",
-          "points": 5,
-          "text": "Which team will have the worst record in the league on November 30?",
-          "answer": null
-        },
-        {
-          "id": "ruduo-3",
+          "id": "ruduo-q02",
           "type": "team",
           "conf": "E",
-          "points": 3,
-          "text": "Who will be the #1 seed in the East on November 30?",
+          "points": 2,
+          "reveal": "November 30 11:00",
+          "text": "Kuri komanda žiemą rikiuosis pirmoje vietoje Rytų konferencijoje?",
           "answer": null
         },
         {
-          "id": "ruduo-4",
+          "id": "ruduo-q03",
           "type": "team",
           "conf": "W",
+          "points": 2,
+          "reveal": "November 30 11:00",
+          "text": "Kuri komanda žiemą rikiuosis paskutinėje vietoje Vakarų konferencijoje?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-q04",
+          "type": "text",
           "points": 3,
-          "text": "Who will be the #1 seed in the West on November 30?",
+          "reveal": "November 30 11:00",
+          "text": "Kuris žaidėjas iki žiemos bus įmetęs daugiausiai taškų (iš viso)? (Pilnas vardas, pavardė)",
           "answer": null
         },
         {
-          "id": "ruduo-5",
-          "type": "team",
-          "points": 4,
-          "text": "Which team will win the NBA Cup?",
+          "id": "ruduo-q05",
+          "type": "choice",
+          "options": [
+            "Taip",
+            "Ne"
+          ],
+          "points": 1,
+          "reveal": "November 30 11:00",
+          "text": "Ar kažkas iki žiemos bus įmetęs bent 51 tašką per vienerias rungtynes?",
           "answer": null
         },
         {
-          "id": "ruduo-6",
-          "type": "text",
-          "points": 4,
-          "text": "Who will lead the league in points per game on November 30?",
+          "id": "ruduo-q06",
+          "type": "choice",
+          "options": [
+            "AJ Dybantsa",
+            "Darryn Peterson",
+            "Cameron Boozer",
+            "Caleb Wilson",
+            "Keaton Wagler",
+            "Mikel Brown Jr.",
+            "Darius Acuff Jr.",
+            "Kingston Flemings",
+            "Morez Johnson Jr.",
+            "Brayden Burries",
+            "Yaxel Lendeborg",
+            "Aday Mara",
+            "Nate Ament",
+            "Hannes Steinbach",
+            "Dailyn Swain",
+            "Bennett Stirtz",
+            "Ebuka Okorie",
+            "Christian Anderson Jr.",
+            "Allen Graves",
+            "Jayden Quaintance",
+            "Karim López",
+            "Labaron Philon Jr.",
+            "Zuby Ejiofor",
+            "Cameron Carr",
+            "Sergio de Larrea",
+            "Tarris Reed Jr.",
+            "Chris Cenac Jr.",
+            "Joshua Jefferson",
+            "Alex Karaban",
+            "Koa Peat",
+            "Bruce Thornton",
+            "Richie Saunders",
+            "Isaiah Evans",
+            "Meleek Thomas",
+            "Trevon Brazile",
+            "Baba Miller",
+            "Ryan Conwell",
+            "Braden Smith",
+            "Jack Kayil",
+            "Dillon Mitchell",
+            "Otega Oweh",
+            "Ja'Kobi Gillespie",
+            "Tyler Bilodeau",
+            "Maliq Brown",
+            "Emanuel Sharp",
+            "Felix Okpara",
+            "Tyler Nickel",
+            "Tobi Lawal",
+            "Bryce Hopkins",
+            "Jaden Bradley",
+            "Izaiyah Nelson",
+            "Henri Veesaar",
+            "Ugonna Onyenso",
+            "Lajae Jones",
+            "Nick Martinelli",
+            "Vsevolod Ishchenko",
+            "Narcisse Ngoy",
+            "Jaron Pierre Jr.",
+            "Trey Kaufman-Renn",
+            "Malique Lewis"
+          ],
+          "points": 3,
+          "reveal": "November 30 11:00",
+          "text": "Kuris NBA naujokas iki žiemos turės didžiausią pelnomų taškų vidurkį? (Pilnas vardas, pavardė)",
           "answer": null
         },
         {
-          "id": "ruduo-7",
-          "type": "text",
-          "points": 4,
-          "text": "Who will lead the league in rebounds per game on November 30?",
-          "answer": null
-        },
-        {
-          "id": "ruduo-8",
-          "type": "text",
-          "points": 4,
-          "text": "Who will be the first head coach fired this season?",
-          "answer": null
-        },
-        {
-          "id": "ruduo-9",
+          "id": "ruduo-q07",
           "type": "number",
+          "closest": true,
           "points": 3,
-          "tolerance": 1,
-          "text": "How many wins will the league's best team have on November 30? (±1 counts)",
+          "reveal": "November 30 11:00",
+          "text": "Kiek pergalių turės geriausia NBA komanda iki žiemos? (Taškus gauna arčiausiai atspėjęs)",
           "answer": null
         },
         {
-          "id": "ruduo-10",
-          "type": "choice",
-          "points": 2,
-          "options": [
-            "0",
-            "1",
-            "2",
-            "3 or more"
-          ],
-          "text": "How many teams will still be unbeaten on November 1?",
+          "id": "ruduo-q08",
+          "type": "number",
+          "closest": true,
+          "points": 3,
+          "reveal": "November 30 11:00",
+          "text": "Kiek trigubų dublių iš viso bus užfiksuota NBA iki žiemos? (Taškus gauna arčiausiai atspėjęs)",
           "answer": null
         },
         {
-          "id": "ruduo-11",
+          "id": "ruduo-q09",
           "type": "choice",
-          "points": 2,
           "options": [
-            "Yes",
-            "No"
+            "Taip",
+            "Ne"
           ],
-          "text": "Will any player score 60+ points in a game before December 1?",
+          "points": 1,
+          "reveal": "November 30 11:00",
+          "text": "Ar Steph Curry bent vienose rungtynėse iki žiemos pataikys 8 tritaškius?",
           "answer": null
         },
         {
-          "id": "ruduo-12",
+          "id": "ruduo-q10",
           "type": "choice",
-          "points": 2,
           "options": [
-            "Yes",
-            "No"
+            "Taip",
+            "Ne"
           ],
-          "text": "Will there be a trade involving an All-Star before December 1?",
+          "points": 1,
+          "reveal": "November 30 11:00",
+          "text": "Ar Luka Dončić gaus bent 5 technines pražangas iki žiemos?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-q11",
+          "type": "choice",
+          "options": [
+            "Giannis Antetokounmpo",
+            "Warriors"
+          ],
+          "points": 1,
+          "reveal": "November 30 11:00",
+          "text": "Kas prames daugiau baudų iki žiemos – Giannis Antetokounmpo ar visa „Warriors“ komanda kartu?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-q12",
+          "type": "choice",
+          "options": [
+            "Luka Dončić",
+            "Nikola Jokić",
+            "Trae Young"
+          ],
+          "points": 1,
+          "reveal": "November 30 11:00",
+          "text": "Kuris žaidėjas iki žiemos turės daugiau rungtynių su bent 5 klaidomis – Luka Dončić, Nikola Jokić ar Trae Young?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-q13",
+          "type": "choice",
+          "options": [
+            "Taip",
+            "Ne"
+          ],
+          "points": 1,
+          "reveal": "Reguliarus sezonas",
+          "text": "Ar Anthony Davis reguliariajame sezone sužais 50 rungtynių?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-q14",
+          "type": "choice",
+          "options": [
+            "Joel Embiid",
+            "Zion Williamson",
+            "Kawhi Leonard"
+          ],
+          "points": 1,
+          "reveal": "Reguliarus sezonas",
+          "text": "Kuris iš šių žaidėjų reguliariajme sezone sužais mažiausiai rungtynių: Joel Embiid, Zion Williamson ar Kawhi Leonard?",
+          "answer": null
+        },
+        {
+          "id": "ruduo-q15",
+          "type": "choice",
+          "options": [
+            "Taip",
+            "Ne"
+          ],
+          "points": 1,
+          "reveal": "Reguliarus sezonas",
+          "text": "Ar bent viena komanda reguliarųjį sezoną baigs turėdama 62 ar daugiau pergalių?",
           "answer": null
         }
       ]

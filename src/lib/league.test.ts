@@ -19,6 +19,13 @@ describe("league.json", () => {
     assert.deepEqual(validateLeague(real), []);
   });
 
+  it("Ruduo has 15 questions, season-long ones last", () => {
+    const r = real.stages[0].questions;
+    assert.equal(r.length, 15);
+    const firstSeason = r.findIndex((x) => x.reveal === "Reguliarus sezonas");
+    assert.ok(firstSeason > 0 && r.slice(firstSeason).every((x) => x.reveal === "Reguliarus sezonas"));
+  });
+
   it("has the four stages in order", () => {
     assert.deepEqual(real.stages.map((s) => s.name), ["Ruduo", "Kalėdos", "All-Star", "Pavasaris"]);
   });
@@ -39,18 +46,20 @@ describe("validateLeague", () => {
         stage([
           q({ id: "a", type: "team", answer: "XYZ" }),
           q({ id: "a", type: "choice", options: ["Yes"], answer: "Maybe" }),
-          q({ id: "c", points: 0 }),
+          q({ id: "c", points: 0, closest: true }),
+          q({ id: "d", type: "choice", options: ["Taip", "Taip"] }),
         ]),
       ],
     };
     const errors = validateLeague(bad).join("\n");
     assert.match(errors, /Duplicate player/);
-    assert.match(errors, /expected 12/);
     assert.match(errors, /duplicate question id/);
     assert.match(errors, /not a team code/);
     assert.match(errors, /at least two options/);
     assert.match(errors, /not one of the options/);
     assert.match(errors, /points must be more than 0/);
+    assert.match(errors, /only works for number questions/);
+    assert.match(errors, /same option twice/);
   });
 });
 
@@ -78,6 +87,33 @@ describe("isCorrect", () => {
     assert.equal(isCorrect(wins, "19"), false);
     assert.equal(isCorrect(wins, "lots"), false);
     assert.equal(isCorrect(q({ type: "number", answer: "5" }), "5"), true);
+  });
+});
+
+describe("closest guess", () => {
+  const wins = q({ type: "number", closest: true, answer: "17" });
+  it("gives the points to the nearest guess, and to everyone tied for nearest", () => {
+    const all = ["12", "15", "19", "30", undefined];
+    assert.equal(isCorrect(wins, "15", all), true);
+    assert.equal(isCorrect(wins, "19", all), true);
+    assert.equal(isCorrect(wins, "12", all), false);
+    assert.equal(isCorrect(wins, "30", all), false);
+  });
+  it("a lone guess is the closest even if far off", () => {
+    assert.equal(isCorrect(wins, "40", ["40"]), true);
+  });
+  it("accepts a comma as a decimal point", () => {
+    assert.equal(isCorrect(q({ type: "number", answer: "2.5" }), "2,5"), true);
+  });
+  it("works through standings", () => {
+    const s = stage([wins]);
+    const league: League = { season: "x", sheetUrl: "", players: ["Ana", "Bo", "Cy"], stages: [s] };
+    const rows = standings(league, [
+      { player: "Ana", stage: "s1", submittedAt: "", answers: { q: "16" } },
+      { player: "Bo", stage: "s1", submittedAt: "", answers: { q: "18" } },
+      { player: "Cy", stage: "s1", submittedAt: "", answers: { q: "10" } },
+    ]);
+    assert.deepEqual(rows.map((r) => [r.player, r.total]), [["Ana", 2], ["Bo", 2], ["Cy", 0]]);
   });
 });
 
